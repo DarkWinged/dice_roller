@@ -7,7 +7,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e26d3855-a966-4343-845d-b361046b29ef" name="Changes" comment="" />
+    <list default="true" id="e26d3855-a966-4343-845d-b361046b29ef" name="Changes" comment="new:&#10;   test_add_tiles&#10;   test_add_token">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/room.py" beforeDir="false" afterPath="$PROJECT_DIR$/room.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/token_unit_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/token_unit_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tile.py" beforeDir="false" afterPath="$PROJECT_DIR$/tile.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +25,14 @@
         <option value="Python Script" />
       </list>
     </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Dev" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitSEFilterConfiguration">
     <file-type-list>
@@ -50,7 +63,7 @@
       <recent name="$PROJECT_DIR$/tests" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Python tests for token_unit_test.test_move_token">
+  <component name="RunManager" selected="Python tests.Python tests for token_unit_test.test_flood_fill">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="dice_roller" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -72,34 +85,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests for character_sheet_unit_test" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="dice_roller" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;character_sheet_unit_test&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Python tests for token_unit_test.test_apply_range_to_room" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="dice_roller" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;token_unit_test.test_apply_range_to_room&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <configuration name="Python tests for token_unit_test.test_draw_tiles_in_circle" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="dice_roller" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -111,6 +96,20 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;token_unit_test.test_draw_tiles_in_circle&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for token_unit_test.test_flood_fill" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="dice_roller" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;token_unit_test.test_flood_fill&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -128,6 +127,20 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="Python tests for token_unit_test.test_new_map" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="dice_roller" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;token_unit_test.test_new_map&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="Python tests for token_unit_test.test_render_room" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="dice_roller" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -142,27 +155,13 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests for token_unit_test.test_tile_range" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="dice_roller" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;token_unit_test.test_tile_range&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Python tests for token_unit_test.test_flood_fill" />
+        <item itemvalue="Python tests.Python tests for token_unit_test.test_new_map" />
         <item itemvalue="Python tests.Python tests for token_unit_test.test_move_token" />
         <item itemvalue="Python tests.Python tests for token_unit_test.test_render_room" />
         <item itemvalue="Python tests.Python tests for token_unit_test.test_draw_tiles_in_circle" />
-        <item itemvalue="Python tests.Python tests for token_unit_test.test_apply_range_to_room" />
-        <item itemvalue="Python tests.Python tests for token_unit_test.test_tile_range" />
       </list>
     </recent_temporary>
   </component>
@@ -175,6 +174,49 @@
       <option name="presentableId" value="Default" />
       <updated>1645392048156</updated>
     </task>
+    <task id="LOCAL-00001" summary="Workspace setup">
+      <created>1646620746891</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1646620746891</updated>
+    </task>
+    <task id="LOCAL-00002" summary="new:&#10;   test_add_tiles&#10;   test_add_token">
+      <created>1646627147133</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1646627147133</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="feature_token_interactions" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Workspace setup" />
+    <MESSAGE value="new:&#10;   test_add_tiles&#10;   test_add_token" />
+    <option name="LAST_COMMIT_MESSAGE" value="new:&#10;   test_add_tiles&#10;   test_add_token" />
   </component>
 </project>
