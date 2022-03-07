@@ -48,3 +48,5 @@ class MapToken:
 
     def valid_targets(self): pass
 
+    def __str__(self) -> str:
+        return f'map_token{self._name, self._position, self._actions, self.character_sheet}'

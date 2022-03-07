@@ -1,4 +1,4 @@
-import map_token
+from map_token import MapToken
 import room
 from room import Room
 
@@ -29,10 +29,47 @@ def test_render_room():
     assert f'{box}' == test_string
 
 
+def test_add_tiles():
+    tile_set = ['E', 'F', 'W']
+    size = (5, 5)
+    test_room = Room(1234, size, tile_set)
+    test_string = 'FFWFF\n' \
+                  'FFWFF\n' \
+                  'FFWWF\n' \
+                  'FFFFF\n' \
+                  'FFFFF\n'
+
+    test_room.add_tile((4, 2), {'icon': 1, 'passable': False})
+    test_room.add_tile((3, 2), {'icon': 1, 'passable': False})
+    test_room.add_tile((2, 2), {'icon': 1, 'passable': False})
+    test_room.add_tile((2, 3), {'icon': 1, 'passable': False})
+
+    assert f'{test_room}' == test_string
+
+
+def test_add_token():
+    bob_name = 'bob'
+    bob_start = (0, 0)
+    bob_token = MapToken(bob_name, bob_start)
+    dan_name = 'dan'
+    dan_start = (5, 5)
+    dan_token = MapToken(dan_name, dan_start)
+    tile_set = ['E', 'F', 'W']
+    size = (5, 5)
+    test_map = Room(5678, size, tile_set)
+
+    test_map.add_token(bob_token)
+    test_map.add_token(bob_token)
+    test_map.add_token(dan_token)
+
+    assert bob_token in test_map.tokens.values()
+    assert dan_token in test_map.tokens.values()
+
+
 def test_move_token():
     token_name = 'fred'
     initial_position = (1, 1)
-    test_token = map_token.MapToken(token_name, initial_position)
+    test_token = MapToken(token_name, initial_position)
     tile_set = ['E', 'F', 'W']
     size = (5, 5)
     test_map = Room(5678, size, tile_set)
@@ -43,3 +80,7 @@ def test_move_token():
 
     assert test_map.tokens[token_name].position[0] == initial_position[0] + movement[0]
     assert test_map.tokens[token_name].position[1] == initial_position[1] + movement[1]
+
+
+def test_path_finding():
+    pass

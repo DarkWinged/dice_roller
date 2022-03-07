@@ -66,13 +66,9 @@ class Room:
     def tokens(self):
         return self._tokens
 
-    @property
-    def tiles(self):
-        return self._tiles
-
     def __str__(self):
         string = ''
-        for x in range(self._size[0]):
+        for x in reversed(range(self._size[0])):
             for y in range(self._size[1]):
                 if self._tiles[(x, y)].icon in self._tile_set:
                     tile_icon = self._tile_set[self._tiles[(x, y)].icon]
@@ -82,9 +78,16 @@ class Room:
             string = f'{string}\n'
         return string
 
+    def add_tile(self, position: tuple[int, int], tile_type: dict[str, any] = None):
+        self._tiles[position] = Tile(position, tile_type)
+
+    @property
+    def tiles(self):
+        return self._tiles
+
     def add_token(self, new_token: MapToken):
         if new_token.name in self._tokens.keys() and new_token is not self._tokens[new_token.name]:
-            raise NameError(f'Name({new_token.name}: {new_token}) already exists in Room._tokens['
+            raise NameError(f'Name: {new_token.name, new_token} already exists in Room._tokens['
                             f'{self._tokens[new_token.name]}]')
         else:
             self._tokens[new_token.name] = new_token
