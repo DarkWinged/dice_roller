@@ -28,6 +28,10 @@ class Tile:
     def position(self) -> tuple[int, int]:
         return self._position
 
+    @position.setter
+    def position(self, new_position: tuple(int, int)):
+        self._position = new_position
+
     @property
     def movement_cost(self) -> int:
         if self._passable:
