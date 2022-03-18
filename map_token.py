@@ -1,5 +1,9 @@
-class MapToken:
-    def __init__(self, name: str, position: tuple[int, int]):
+from character_sheet import CharacterSheet
+
+
+class CreatureToken:
+    def __init__(self, name: str, position: tuple[int, int], sheet: CharacterSheet):
+        self._sheet = sheet
         self._name = name
         self._position = position
         self._actions = {'standard': True, 'movement': True, 'reaction': True}

@@ -1,4 +1,4 @@
-from map_token import MapToken
+from map_token import CreatureToken
 from tile import Tile
 
 
@@ -54,7 +54,8 @@ def get_neighbors(point: tuple[int, int]) -> tuple[tuple[int, int], list[tuple[i
 
 
 class Room:
-    def __init__(self, seed: int, size: tuple[int, int], tile_set: list[str], tile_map: dict[tuple[int, int], Tile] = None):
+    def __init__(self, seed: int, size: tuple[int, int], tile_set: list[str],
+                 tile_map: dict[tuple[int, int], Tile] = None):
         if tile_map is None:
             self._tiles = {}
             for x in range(size[0]):
@@ -62,7 +63,7 @@ class Room:
                     self._tiles[(x, y)] = Tile((x, y), {})
         else:
             self._tiles = tile_map
-        self._tokens: dict[str, MapToken] = {}
+        self._tokens: dict[str, CreatureToken] = {}
         self._seed = seed
         self._size = size
         self._tile_set: dict[int, str] = {}
@@ -103,7 +104,7 @@ class Room:
     def tiles(self):
         return self._tiles
 
-    def add_token(self, new_token: MapToken):
+    def add_token(self, new_token: CreatureToken):
         if new_token.name in self._tokens.keys() and new_token is not self._tokens[new_token.name]:
             raise NameError(f'Name: {new_token.name, new_token} already exists in Room._tokens['
                             f'{self._tokens[new_token.name]}]')
@@ -116,7 +117,7 @@ class Room:
         if self.validate_movement(moving_token, target):
             self._tokens[token_name].position = target
 
-    def validate_movement(self, moving_token: MapToken, target_position: tuple[int, int]) -> bool:
+    def validate_movement(self, moving_token: CreatureToken, target_position: tuple[int, int]) -> bool:
         if not moving_token.action_movement:
             return False
         elif target_position not in self._tiles.keys():
