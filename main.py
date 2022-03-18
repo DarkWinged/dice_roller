@@ -1,10 +1,19 @@
+import argparse
+
 import tcod
 
 from map_token import CreatureToken
 from room import Room
 
 
-def game_init():
+def init_parser():
+    new_parser = argparse.ArgumentParser(description='Launch a simple rougelike adventure game.')
+    new_parser.add_argument('-w', '--window_size', dest='window_size', default='80x50', type=str,
+                            help='Set the window size')
+    return new_parser
+
+
+def init_game():
     game_tile_set = {
         'E': {'icon': -1, 'description': 'An empty void...'},
         'F': {'icon': 0, 'description': 'A patch of smooth stone floor.'},
@@ -43,9 +52,12 @@ def game_init():
     return renderer, game_tile_set, tcod_tile_set
 
 
-def game_loop(renderer, game_tile_set, tcod_tile_set):
-    screen_width = 80
-    screen_height = 50
+def loop_game(renderer, game_tile_set, tcod_tile_set, window_size=None):
+    if window_size is None:
+        screen_width = 80
+        screen_height = 50
+    else:
+        screen_width, screen_height = window_size
 
     with tcod.context.new_terminal(
             screen_width,
@@ -154,7 +166,7 @@ class MapRenderer:
         rules = self.rules[tile]
         x_max, y_max = limits
         sample = ''
-        samples = [(x, y-1), (x+1, y), (x, y+1), (x-1, y)]
+        samples = [(x, y - 1), (x + 1, y), (x, y + 1), (x - 1, y)]
 
         for rule in rules:
             if 'a' in rule:
@@ -217,5 +229,10 @@ class Menu:
 
 
 if __name__ == '__main__':
-    init_renderer, init_game_tile_set, init_tcod_tile_set = game_init()
-    game_loop(init_renderer, init_game_tile_set, init_tcod_tile_set)
+    parser = init_parser()
+    args = parser.parse_args()
+    init_window_size = args.window_size.split(sep='x')
+    init_window_size = (int(init_window_size[0]), int(init_window_size[1]))
+
+    init_renderer, init_game_tile_set, init_tcod_tile_set = init_game()
+    loop_game(init_renderer, init_game_tile_set, init_tcod_tile_set, init_window_size)
