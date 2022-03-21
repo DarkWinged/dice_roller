@@ -6,44 +6,55 @@ from map_token import CreatureToken
 from room import Room
 
 
-def game_init() -> pygame.display:
-    pygame.init()
-    return pygame.display.set_mode([500, 500])
+def game_init():
+    game_tile_set = {
+        'E': {'icon': -1, 'description': 'An empty void...'},
+        'F': {'icon': 0, 'description': 'A patch of smooth stone floor.'},
+        'W': {'icon': 1, 'passable': False, 'description': 'A solid brick wall.'},
+        'R': {'icon': 2, 'movement_cost': 2, 'description': 'A pile of rubble littering the floor.'},
+        'U': {'icon': 3, 'description': 'A staircase leading up to the surface.'},
+        'D': {'icon': 4, 'description': 'A staircase leading down deeper into the dungeon.'}
+    }
 
+    renderer = MapRenderer()
+    renderer.add_rule('W', 'fftt', renderer.pipe_syms[0])
+    renderer.add_rule('W', 'tfft', renderer.pipe_syms[1])
+    renderer.add_rule('W', 'ttff', renderer.pipe_syms[2])
+    renderer.add_rule('W', 'fttf', renderer.pipe_syms[3])
+    renderer.add_rule('W', 'ttft', renderer.pipe_syms[4])
+    renderer.add_rule('W', 'fttt', renderer.pipe_syms[5])
+    renderer.add_rule('W', 'tftt', renderer.pipe_syms[6])
+    renderer.add_rule('W', 'tttf', renderer.pipe_syms[7])
+    renderer.add_rule('W', 'tttt', renderer.pipe_syms[8])
+    renderer.add_rule('W', 'ftft', renderer.pipe_syms[9])
+    renderer.add_rule('W', 'ftff', renderer.pipe_syms[9])
+    renderer.add_rule('W', 'ffft', renderer.pipe_syms[9])
+    renderer.add_rule('W', 'tftf', renderer.pipe_syms[10])
+    renderer.add_rule('W', 'tfff', renderer.pipe_syms[10])
+    renderer.add_rule('W', 'fftf', renderer.pipe_syms[10])
+    renderer.add_rule('F', 'a', renderer.block_syms[2])
+    renderer.add_rule('R', 'a', renderer.block_syms[0])
+    renderer.add_rule('U', 'a', renderer.block_syms[4])
+    renderer.add_rule('D', 'a', renderer.block_syms[3])
+    renderer.add_rule('E', 'a', ' ')
 
-def game_loop(screen: pygame.display):
-    running = True
-
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    running = False
-
-        screen.fill((255, 255, 255))
-        pygame.draw.circle(screen, (0, 0, 255), (250, 250), 75)
-        pygame.display.flip()
-
-    pygame.quit()
-
-
-def main():
-
-    screen_width = 80
-    screen_height = 50
-
-    tile_set = tcod.tileset.load_tilesheet(
+    tcod_tile_set = tcod.tileset.load_tilesheet(
         "assets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
 
+    return renderer, game_tile_set, tcod_tile_set
+
+
+def game_loop(renderer, game_tile_set, tcod_tile_set):
+    screen_width = 80
+    screen_height = 50
+
     with tcod.context.new_terminal(
-        screen_width,
-        screen_height,
-        tileset=tile_set,
-        title="Yet Another Roguelike Tutorial",
-        vsync=True,
+            screen_width,
+            screen_height,
+            tileset=tcod_tile_set,
+            title="Yet Another Roguelike Tutorial",
+            vsync=True,
     ) as context:
         root_console = tcod.Console(screen_width, screen_height, order="F")
         running = True
@@ -53,28 +64,24 @@ def main():
             context.present(root_console)
             menu.render(root_console)
 
-            tile_set = {
-                'E': {'icon': -1, 'description': 'An empty void...'},
-                'F': {'icon': 0, 'description': 'A patch of smooth stone floor.'},
-                'W': {'icon': 1, 'passable': False, 'description': 'A solid brick wall.'},
-                'R': {'icon': 2, 'movement_cost': 2, 'description': 'A pile of rubble littering the floor.'},
-                'U': {'icon': 3, 'description': 'A staircase leading up to the surface.'},
-                'D': {'icon': 4, 'description': 'A staircase leading down deeper into the dungeon.'}
-            }
             tile_map = [
                 ['W', 'W', 'W', 'W', 'W', 'W', 'W'],
                 ['W', 'D', 'W', 'U', 'R', 'F', 'W'],
                 ['W', 'F', 'W', 'F', 'R', 'F', 'W'],
                 ['W', 'F', 'W', 'F', 'R', 'F', 'W'],
                 ['W', 'F', 'F', 'F', 'F', 'F', 'W'],
-                ['W', 'F', 'F', 'F', 'F', 'F', 'W'],
+                ['W', 'F', 'F', 'E', 'E', 'F', 'W'],
+                ['W', 'W', 'W', 'W', 'W', 'W', 'W'],
+                ['W', 'F', 'W', 'F', 'R', 'F', 'W'],
+                ['W', 'W', 'W', 'W', 'F', 'F', 'W'],
+                ['W', 'F', 'W', 'E', 'E', 'F', 'W'],
                 ['W', 'W', 'W', 'W', 'W', 'W', 'W']
             ]
-            test_room = Room.new(5678, tile_set, tile_map)
+            test_room = Room.new(5678, game_tile_set, tile_map)
             player_start = [position for position in test_room.tiles.keys() if test_room.tiles[position].icon == 3][0]
             player = CreatureToken('player_name', player_start, {})
             test_room.add_token(player)
-            root_console.print(x=15, y=5, string=f"{test_room}")
+            root_console.print(x=25, y=5, string=f"{renderer.render(test_room.__str__())}")
 
             for event in tcod.event.wait():
                 context.convert_event(event)  # Add tile coordinates to mouse events.
@@ -102,6 +109,77 @@ def main():
                         print(event)  # Show any unhandled events.
 
 
+class MapRenderer:
+    block_syms = ['░', '▒', '▓', '▐', '▀']
+    pipe_syms = ['╗', '╝', '╚', '╔', '╩', '╦', '╣', '╠', '╬', '═', '║']
+    line_syms = ['┐', '┘', '└', '┌', '┴', '┬', '┤', '├', '┼', '─', '│']
+
+    def __init__(self):
+        self.rules = {}
+
+    def add_rule(self, tile: str, rule: str, sub: str):
+        new_rule = {rule: sub}
+        if tile in self.rules.keys():
+            if new_rule not in self.rules[tile]:
+                self.rules[tile].append(new_rule)
+        else:
+            self.rules[tile] = [new_rule]
+
+    def render(self, tiles: str):
+        rows = tiles.split(sep='\n')
+        rows_to_cull = []
+        for index, row in enumerate(rows):
+            if row == '':
+                rows_to_cull.append(index)
+
+        rows_to_cull.sort(reverse=True)
+        for cull in rows_to_cull:
+            rows.pop(cull)
+
+        height = len(rows)
+        width = len(rows[0])
+        result = ''
+
+        for y in range(height):
+            for x in range(width):
+                tile = rows[y][x]
+                if tile in self.rules.keys():
+                    tile = self.apply_rules((x, y), (width, height), rows)
+                result = f'{result}{tile}'
+            result = f'{result}\n'
+
+        return result
+
+    def apply_rules(self, position: tuple[int, int], limits: tuple[int, int], rows: list[str]) -> str:
+        x, y = position
+        tile = rows[y][x]
+        rules = self.rules[tile]
+        x_max, y_max = limits
+        sample = ''
+        samples = [(x, y-1), (x+1, y), (x, y+1), (x-1, y)]
+
+        for rule in rules:
+            if 'a' in rule:
+                return rule['a']
+
+        for count, position in enumerate(samples):
+            x_relative, y_relative = position
+            if 0 <= x_relative < x_max and 0 <= y_relative < y_max:
+                if rows[y_relative][x_relative] == tile:
+                    sample = f'{sample}t'
+                else:
+                    sample = f'{sample}f'
+            else:
+                sample = f'{sample}f'
+
+        if x == 7 and y == 0:
+            print((x, y), samples)
+        for rule in rules:
+            if sample in rule:
+                return rule[sample]
+        return tile
+
+
 class Menu:
     def __init__(self, position: tuple[int, int], options: dict[str, callable(None)]):
         self.position = position
@@ -120,12 +198,13 @@ class Menu:
 
     def render(self, console: tcod.Console):
         console.clear()
-        console.print(x=self.position[0], y=self.position[1], string="MENU")
+        console.print(x=self.position[0], y=self.position[1], string=f" {'_' * 5}MENU{'_' * 5}")
         for item, menu_item in enumerate(self.menu_options.keys()):
             if item == self.curser:
-                console.print(x=self.position[0], y=self.position[1] + item + 1, string=menu_item, fg=(0, 255, 0))
+                console.print(x=self.position[0], y=self.position[1] + item + 1, string=f'|{menu_item:<14}|',
+                              fg=(0, 255, 0))
             else:
-                console.print(x=self.position[0], y=self.position[1] + item + 1, string=menu_item)
+                console.print(x=self.position[0], y=self.position[1] + item + 1, string=f'|{menu_item:<14}|')
 
     @property
     def curser_key(self):
@@ -140,5 +219,5 @@ class Menu:
 
 
 if __name__ == '__main__':
-    main()
-    # game_loop(game_init())
+    init_renderer, init_game_tile_set, init_tcod_tile_set = game_init()
+    game_loop(init_renderer, init_game_tile_set, init_tcod_tile_set)
