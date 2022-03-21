@@ -1,6 +1,4 @@
-import pygame
 import tcod
-from pygame.constants import KEYDOWN, K_ESCAPE
 
 from map_token import CreatureToken
 from room import Room

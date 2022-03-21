@@ -1,2 +1,2 @@
-pygame>=2.1.2
 tcod>=11.13
+pytest==7.1.1
