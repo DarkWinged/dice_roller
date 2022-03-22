@@ -1,6 +1,7 @@
 import argparse
 
 import tcod
+from tcod import Console
 
 from map_token import CreatureToken
 from room import Room
@@ -24,26 +25,27 @@ def init_game():
     }
 
     renderer = MapRenderer()
-    renderer.add_rule('W', 'fftt', renderer.pipe_syms[0])
-    renderer.add_rule('W', 'tfft', renderer.pipe_syms[1])
-    renderer.add_rule('W', 'ttff', renderer.pipe_syms[2])
-    renderer.add_rule('W', 'fttf', renderer.pipe_syms[3])
-    renderer.add_rule('W', 'ttft', renderer.pipe_syms[4])
-    renderer.add_rule('W', 'fttt', renderer.pipe_syms[5])
-    renderer.add_rule('W', 'tftt', renderer.pipe_syms[6])
-    renderer.add_rule('W', 'tttf', renderer.pipe_syms[7])
-    renderer.add_rule('W', 'tttt', renderer.pipe_syms[8])
-    renderer.add_rule('W', 'ftft', renderer.pipe_syms[9])
-    renderer.add_rule('W', 'ftff', renderer.pipe_syms[9])
-    renderer.add_rule('W', 'ffft', renderer.pipe_syms[9])
-    renderer.add_rule('W', 'tftf', renderer.pipe_syms[10])
-    renderer.add_rule('W', 'tfff', renderer.pipe_syms[10])
-    renderer.add_rule('W', 'fftf', renderer.pipe_syms[10])
-    renderer.add_rule('F', 'a', renderer.block_syms[2])
-    renderer.add_rule('R', 'a', renderer.block_syms[0])
-    renderer.add_rule('U', 'a', renderer.block_syms[4])
-    renderer.add_rule('D', 'a', renderer.block_syms[3])
-    renderer.add_rule('E', 'a', ' ')
+    wall_fg, wall_bg = (30, 60, 120), (30, 30, 60)
+    renderer.add_rule('W', 'fftt', renderer.pipe_symbols[0], wall_fg, wall_bg)
+    renderer.add_rule('W', 'tfft', renderer.pipe_symbols[1], wall_fg, wall_bg)
+    renderer.add_rule('W', 'ttff', renderer.pipe_symbols[2], wall_fg, wall_bg)
+    renderer.add_rule('W', 'fttf', renderer.pipe_symbols[3], wall_fg, wall_bg)
+    renderer.add_rule('W', 'ttft', renderer.pipe_symbols[4], wall_fg, wall_bg)
+    renderer.add_rule('W', 'fttt', renderer.pipe_symbols[5], wall_fg, wall_bg)
+    renderer.add_rule('W', 'tftt', renderer.pipe_symbols[6], wall_fg, wall_bg)
+    renderer.add_rule('W', 'tttf', renderer.pipe_symbols[7], wall_fg, wall_bg)
+    renderer.add_rule('W', 'tttt', renderer.pipe_symbols[8], wall_fg, wall_bg)
+    renderer.add_rule('W', 'ftft', renderer.pipe_symbols[9], wall_fg, wall_bg)
+    renderer.add_rule('W', 'ftff', renderer.pipe_symbols[9], wall_fg, wall_bg)
+    renderer.add_rule('W', 'ffft', renderer.pipe_symbols[9], wall_fg, wall_bg)
+    renderer.add_rule('W', 'tftf', renderer.pipe_symbols[10], wall_fg, wall_bg)
+    renderer.add_rule('W', 'tfff', renderer.pipe_symbols[10], wall_fg, wall_bg)
+    renderer.add_rule('W', 'fftf', renderer.pipe_symbols[10], wall_fg, wall_bg)
+    renderer.add_rule('F', 'a', renderer.block_symbols[2], wall_fg, wall_bg)
+    renderer.add_rule('R', 'a', renderer.block_symbols[0], wall_fg, wall_bg)
+    renderer.add_rule('U', 'a', renderer.block_symbols[4], wall_fg, wall_bg)
+    renderer.add_rule('D', 'a', renderer.block_symbols[3], wall_fg, wall_bg)
+    renderer.add_rule('E', 'a', ' ', wall_fg, wall_bg)
 
     tcod_tile_set = tcod.tileset.load_tilesheet(
         "assets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
@@ -58,7 +60,7 @@ def loop_game(renderer, game_tile_set, tcod_tile_set, window_size=None):
         screen_height = 50
     else:
         screen_width, screen_height = window_size
-
+    renderer.position = (25, 5)
     with tcod.context.new_terminal(
             screen_width,
             screen_height,
@@ -91,7 +93,7 @@ def loop_game(renderer, game_tile_set, tcod_tile_set, window_size=None):
             player_start = [position for position in test_room.tiles.keys() if test_room.tiles[position].icon == 3][0]
             player = CreatureToken('player_name', player_start, {})
             test_room.add_token(player)
-            root_console.print(x=25, y=5, string=f"{renderer.render(test_room.__str__())}")
+            renderer.render(root_console, test_room.__str__())
 
             for event in tcod.event.wait():
                 context.convert_event(event)  # Add tile coordinates to mouse events.
@@ -120,22 +122,36 @@ def loop_game(renderer, game_tile_set, tcod_tile_set, window_size=None):
 
 
 class MapRenderer:
-    block_syms = ['░', '▒', '▓', '▐', '▀']
-    pipe_syms = ['╗', '╝', '╚', '╔', '╩', '╦', '╣', '╠', '╬', '═', '║']
-    line_syms = ['┐', '┘', '└', '┌', '┴', '┬', '┤', '├', '┼', '─', '│']
+    block_symbols = ['░', '▒', '▓', '▐', '▀']
+    pipe_symbols = ['╗', '╝', '╚', '╔', '╩', '╦', '╣', '╠', '╬', '═', '║']
+    line_symbols = ['┐', '┘', '└', '┌', '┴', '┬', '┤', '├', '┼', '─', '│']
 
     def __init__(self):
+        self._position = (0, 0)
         self.rules = {}
 
-    def add_rule(self, tile: str, rule: str, sub: str):
-        new_rule = {rule: sub}
+    @property
+    def position(self):
+        return self._position
+
+    @position.setter
+    def position(self, pos: tuple[int, int]):
+        self._position = pos
+
+    def add_rule(self, tile: str, rule: str, sub: str, foreground: tuple[int, int, int] = None, background: tuple[int, int, int] = None):
+        if foreground is None:
+            foreground = (255, 255, 255)
+        if background is None:
+            background = (0, 0, 0)
+
+        new_rule = {rule: sub, 'foreground': foreground, 'background': background}
         if tile in self.rules.keys():
             if new_rule not in self.rules[tile]:
                 self.rules[tile].append(new_rule)
         else:
             self.rules[tile] = [new_rule]
 
-    def render(self, tiles: str):
+    def render(self, root_console: Console, tiles: str):
         rows = tiles.split(sep='\n')
         rows_to_cull = []
         for index, row in enumerate(rows):
@@ -148,19 +164,25 @@ class MapRenderer:
 
         height = len(rows)
         width = len(rows[0])
-        result = ''
+        result = []
 
         for y in range(height):
+            result.append([])
             for x in range(width):
                 tile = rows[y][x]
                 if tile in self.rules.keys():
-                    tile = self.apply_rules((x, y), (width, height), rows)
-                result = f'{result}{tile}'
-            result = f'{result}\n'
+                    result[y].append(self.apply_rules((x, y), (width, height), rows))
+
+        x_offset, y_offset = self.position
+        for y in range(height):
+            for x in range(width):
+                tile, foreground, background = result[y][x]
+                root_console.print(x=x+x_offset, y=y+y_offset, string=tile, fg=foreground, bg=background)
 
         return result
 
-    def apply_rules(self, position: tuple[int, int], limits: tuple[int, int], rows: list[str]) -> str:
+    def apply_rules(self, position: tuple[int, int], limits: tuple[int, int], rows: list[str]) ->\
+            (str, tuple[int, int, int]):
         x, y = position
         tile = rows[y][x]
         rules = self.rules[tile]
@@ -170,7 +192,7 @@ class MapRenderer:
 
         for rule in rules:
             if 'a' in rule:
-                return rule['a']
+                return rule['a'], rule['foreground'], rule['background']
 
         for count, position in enumerate(samples):
             x_relative, y_relative = position
@@ -186,8 +208,8 @@ class MapRenderer:
             print((x, y), samples)
         for rule in rules:
             if sample in rule:
-                return rule[sample]
-        return tile
+                return rule[sample], rule['foreground'], rule['background']
+        return tile, (255, 255, 255), (0, 0, 0)
 
 
 class Menu:
