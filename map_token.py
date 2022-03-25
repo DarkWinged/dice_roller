@@ -1,4 +1,5 @@
 from character_sheet import CharacterSheet
+from color import Color
 
 
 class CreatureToken:
@@ -42,7 +43,8 @@ class CreatureToken:
 
     def convert_standard_to_movement(self): pass
 
-    def render(self): pass
+    def render(self):
+        return 'P', Color(0.6, 0.1, 0.2), Color(0.2, 0.1, 0.8)
 
     def take_turn(self): pass
 

@@ -102,10 +102,10 @@ def test_new_map():
 def test_add_token():
     bob_name = 'bob'
     bob_start = (0, 0)
-    bob_token = CreatureToken(bob_name, bob_start)
+    bob_token = CreatureToken(bob_name, bob_start, {})
     dan_name = 'dan'
     dan_start = (5, 5)
-    dan_token = CreatureToken(dan_name, dan_start)
+    dan_token = CreatureToken(dan_name, dan_start, {})
     tile_set = ['E', 'F', 'W']
     size = (5, 5)
     test_map = Room(5678, size, tile_set)
@@ -121,7 +121,7 @@ def test_add_token():
 def test_move_token():
     token_name = 'fred'
     initial_position = (1, 1)
-    test_token = CreatureToken(token_name, initial_position)
+    test_token = CreatureToken(token_name, initial_position, {})
     tile_set = ['E', 'F', 'W']
     size = (5, 5)
     test_map = Room(5678, size, tile_set)

@@ -29,7 +29,7 @@ def roll_advantage(rand_gen: random.Random, number: int, size: int, advantage: A
             return min(result_a,  result_b)
 
 
-def make_analysis(result: int, rolls: List[int]) -> str:
+def make_verbose(result: int, rolls: List[int]) -> str:
     analysis: str = f'Total:{result}, Rolls:('
     for r in rolls:
         analysis = f'{analysis}{r}, '
@@ -38,32 +38,32 @@ def make_analysis(result: int, rolls: List[int]) -> str:
     return analysis
 
 
-def roll_analytical(rand_gen: random.Random, number: int, size: int) -> (int, str):
+def roll_verbose(rand_gen: random.Random, number: int, size: int) -> (int, str):
     rolls: List[int] = []
     for die in range(number):
         this_roll = rand_gen.randint(1, size)
         rolls.append(this_roll)
     result = sum(rolls)
-    return result, make_analysis(result, rolls)
+    return result, make_verbose(result, rolls)
 
 
-def roll_advantage_analytical(rand_gen: random.Random, number: int, size: int, advantage: Advantage = None)\
+def roll_advantage_verbose(rand_gen: random.Random, number: int, size: int, advantage: Advantage = None)\
         -> (int, str):
     if advantage is None:
         advantage = Advantage.no
     match advantage:
         case Advantage.no:
-            return roll_analytical(rand_gen, number, size)
+            return roll_verbose(rand_gen, number, size)
         case Advantage.adv:
-            result_a, analysis_a = roll_analytical(rand_gen, number, size)
-            result_b, analysis_b = roll_analytical(rand_gen, number, size)
-            analysis = f'First roll:{analysis_a}\nSecond roll:{analysis_b}\n'
+            result_a, verbose_a = roll_verbose(rand_gen, number, size)
+            result_b, verbose_b = roll_verbose(rand_gen, number, size)
+            analysis = f'First roll:{verbose_a}\nSecond roll:{verbose_b}\n'
             result = max(result_a,  result_b)
             return result, f'{analysis}Advantage: {result}'
         case Advantage.dis:
-            result_a, analysis_a = roll_analytical(rand_gen, number, size)
-            result_b, analysis_b = roll_analytical(rand_gen, number, size)
-            analysis = f'First roll:{analysis_a}\nSecond roll:{analysis_b}\n'
+            result_a, verbose_a = roll_verbose(rand_gen, number, size)
+            result_b, verbose_b = roll_verbose(rand_gen, number, size)
+            analysis = f'First roll:{verbose_a}\nSecond roll:{verbose_b}\n'
             result = min(result_a,  result_b)
             return result, f'{analysis}Disadvantage: {result}'
 
@@ -123,39 +123,37 @@ class Dice:
         else:
             return True
 
-    def roll(self, analyze: bool = None, **keywords) -> int:
+    def roll(self, verbose: bool = None, **keywords) -> (int, str):
         """
         :keyword modifier: int
         """
         modifier = 'modifier'
-        if analyze:
-            result, analytical_result = roll_analytical(self.rand_gen, self.number, self.size)
+        if verbose:
+            result, verbose_result = roll_verbose(self.rand_gen, self.number, self.size)
             if modifier in keywords and type(keywords[modifier] is int):
                 result += keywords[modifier]
-                analytical_result = f'{analytical_result}. Modifier: {keywords[modifier]}'
-            print(analytical_result)
-            return result
+                verbose_result = f'{verbose_result}. Modifier: {keywords[modifier]}'
+            return result, verbose_result
         else:
             if modifier in keywords and type(keywords[modifier] is int):
                 return keywords[modifier] + roll(self.rand_gen, self.number, self.size)
-            return roll(self.rand_gen, self.number, self.size)
+            return roll(self.rand_gen, self.number, self.size), ''
 
-    def roll_advantage(self, advantage: Advantage = None, analyze: bool = None, **keywords) -> int:
+    def roll_advantage(self, advantage: Advantage = None, verbose: bool = None, **keywords) -> (int, str):
         """
         :keyword modifier: int
         """
         modifier = 'modifier'
         if advantage is None:
             advantage = Advantage.no
-        if analyze:
-            result, analytical_result = roll_advantage_analytical(self.rand_gen, self.number, self.size, advantage)
+        if verbose:
+            result, verbose_result = roll_advantage_verbose(self.rand_gen, self.number, self.size, advantage)
             if modifier in keywords and type(keywords[modifier] is int):
                 result += keywords[modifier]
-                analytical_result = f'{analytical_result}. Modifier: {keywords[modifier]}'
-            print(analytical_result)
-            return result
+                verbose_result = f'{verbose_result}. Modifier: {keywords[modifier]}'
+            return result, verbose_result
         else:
             if modifier in keywords and type(keywords[modifier] is int):
                 return keywords[modifier] + roll_advantage(self.rand_gen, self.number, self.size, advantage)
             else:
-                return roll_advantage(self.rand_gen, self.number, self.size, advantage)
+                return roll_advantage(self.rand_gen, self.number, self.size, advantage), ''

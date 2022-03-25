@@ -3,6 +3,7 @@ import argparse
 import tcod
 from tcod import Console
 
+from color import Color
 from map_token import CreatureToken
 from room import Room
 
@@ -25,7 +26,7 @@ def init_game():
     }
 
     renderer = MapRenderer()
-    wall_fg, wall_bg = (30, 60, 120), (30, 30, 60)
+    wall_fg, wall_bg = Color(0.1, 0.2, 0.3), Color(0.1, 0.1, 0.2)
     renderer.add_rule('W', 'fftt', renderer.pipe_symbols[0], wall_fg, wall_bg)
     renderer.add_rule('W', 'tfft', renderer.pipe_symbols[1], wall_fg, wall_bg)
     renderer.add_rule('W', 'ttff', renderer.pipe_symbols[2], wall_fg, wall_bg)
@@ -93,7 +94,7 @@ def loop_game(renderer, game_tile_set, tcod_tile_set, window_size=None):
             player_start = [position for position in test_room.tiles.keys() if test_room.tiles[position].icon == 3][0]
             player = CreatureToken('player_name', player_start, {})
             test_room.add_token(player)
-            renderer.render(root_console, test_room.__str__())
+            renderer.render(root_console, test_room.__str__(), {f'({player.position[0]},{player.position[1]})': player})
 
             for event in tcod.event.wait():
                 context.convert_event(event)  # Add tile coordinates to mouse events.
@@ -138,7 +139,8 @@ class MapRenderer:
     def position(self, pos: tuple[int, int]):
         self._position = pos
 
-    def add_rule(self, tile: str, rule: str, sub: str, foreground: tuple[int, int, int] = None, background: tuple[int, int, int] = None):
+    def add_rule(self, tile: str, rule: str, sub: str, foreground: tuple[int, int, int] = None,
+                 background: tuple[int, int, int] = None):
         if foreground is None:
             foreground = (255, 255, 255)
         if background is None:
@@ -151,7 +153,7 @@ class MapRenderer:
         else:
             self.rules[tile] = [new_rule]
 
-    def render(self, root_console: Console, tiles: str):
+    def render(self, root_console: Console, tiles: str, entities: dict[str: CreatureToken]):
         rows = tiles.split(sep='\n')
         rows_to_cull = []
         for index, row in enumerate(rows):
@@ -171,18 +173,24 @@ class MapRenderer:
             for x in range(width):
                 tile = rows[y][x]
                 if tile in self.rules.keys():
-                    result[y].append(self.apply_rules((x, y), (width, height), rows))
+                    if f'({x},{y})' in entities.keys():
+                        result[y].append(entities[f'({x},{y})'].render())
+                    else:
+                        result[y].append(self.apply_rules((x, y), (width, height), rows))
 
         x_offset, y_offset = self.position
         for y in range(height):
             for x in range(width):
                 tile, foreground, background = result[y][x]
-                root_console.print(x=x+x_offset, y=y+y_offset, string=tile, fg=foreground, bg=background)
+                if f'({x},{y})' in entities.keys():
+                    root_console.print(x=x+x_offset, y=y+y_offset, string=tile, fg=foreground.rgb(False, 1), bg=background.rgb(False, 1))
+                else:
+                    root_console.print(x=x+x_offset, y=y+y_offset, string=tile, fg=foreground.rgb(), bg=background.rgb())
 
         return result
 
     def apply_rules(self, position: tuple[int, int], limits: tuple[int, int], rows: list[str]) ->\
-            (str, tuple[int, int, int]):
+            (str, Color):
         x, y = position
         tile = rows[y][x]
         rules = self.rules[tile]
@@ -209,7 +217,7 @@ class MapRenderer:
         for rule in rules:
             if sample in rule:
                 return rule[sample], rule['foreground'], rule['background']
-        return tile, (255, 255, 255), (0, 0, 0)
+        return tile, Color(1.0, 1.0, 1.0), (0.0, 0.0, 0.0)
 
 
 class Menu:
