@@ -63,7 +63,6 @@ class Room:
                     self._tiles[(x, y)] = Tile((x, y), {})
         else:
             self._tiles = tile_map
-        self._tokens: dict[str, CreatureToken] = {}
         self._seed = seed
         self._size = size
         self._tile_set: dict[int, str] = {}
@@ -85,7 +84,7 @@ class Room:
     def tokens(self):
         return self._tokens
 
-    def __str__(self):
+    def stringify(self):
         string = ''
         for y in range(self._size[1]):
             for x in range(self._size[0]):
@@ -103,29 +102,6 @@ class Room:
     @property
     def tiles(self):
         return self._tiles
-
-    def add_token(self, new_token: CreatureToken):
-        if new_token.name in self._tokens.keys() and new_token is not self._tokens[new_token.name]:
-            raise NameError(f'Name: {new_token.name, new_token} already exists in Room._tokens['
-                            f'{self._tokens[new_token.name]}]')
-        else:
-            self._tokens[new_token.name] = new_token
-
-    def move_token(self, token_name: str, movement: tuple[int, int]):
-        moving_token = self._tokens[token_name]
-        target = moving_token.position[0] + movement[0], moving_token.position[1] + movement[1]
-        if self.validate_movement(moving_token, target):
-            self._tokens[token_name].position = target
-
-    def validate_movement(self, moving_token: CreatureToken, target_position: tuple[int, int]) -> bool:
-        if not moving_token.action_movement:
-            return False
-        elif target_position not in self._tiles.keys():
-            return False
-        elif target_position not in find_tiles_in_circle(moving_token.speed, moving_token.position):
-            return False
-        else:
-            return True
 
     def flood_fill(self, start: tuple[int, int], movement_points: int) -> list[tuple[int, int]]:
         fill = {}

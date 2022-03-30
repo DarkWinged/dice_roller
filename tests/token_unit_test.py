@@ -18,7 +18,7 @@ def test_draw_tiles_in_circle():
 def test_render_room():
     tile_set = ['E', 'F', 'W']
     size = (5, 5)
-    box = Room(1234, size, tile_set)
+    test_room = Room(1234, size, tile_set)
     test_string = ''
 
     for x in range(size[0]):
@@ -26,7 +26,7 @@ def test_render_room():
             test_string = f'{test_string}{tile_set[1]}'
         test_string = f'{test_string}\n'
 
-    assert f'{box}' == test_string
+    assert test_room.stringify() == test_string
 
 
 def test_add_tiles():
@@ -44,7 +44,7 @@ def test_add_tiles():
     test_room.add_tile((2, 2), {'icon': 1, 'passable': False})
     test_room.add_tile((2, 3), {'icon': 1, 'passable': False})
 
-    assert f'{test_room}' == test_string
+    assert test_room.stringify() == test_string
 
 
 def test_flood_fill():
@@ -92,47 +92,7 @@ def test_new_map():
             result = f'{result}{tile}'
         result = f'{result}\n'
 
-    assert f'{test_room}' == result
+    assert test_room.stringify() == result
     for y, column in enumerate(tile_map):
         for x, tile in enumerate(column):
-            print((x, y), test_room._tile_set[test_room.tiles[(x, y)].icon], tile)
             assert test_room._tile_set[test_room.tiles[(x, y)].icon] == tile
-
-
-def test_add_token():
-    bob_name = 'bob'
-    bob_start = (0, 0)
-    bob_token = CreatureToken(bob_name, bob_start, {})
-    dan_name = 'dan'
-    dan_start = (5, 5)
-    dan_token = CreatureToken(dan_name, dan_start, {})
-    tile_set = ['E', 'F', 'W']
-    size = (5, 5)
-    test_map = Room(5678, size, tile_set)
-
-    test_map.add_token(bob_token)
-    test_map.add_token(bob_token)
-    test_map.add_token(dan_token)
-
-    assert bob_token in test_map.tokens.values()
-    assert dan_token in test_map.tokens.values()
-
-
-def test_move_token():
-    token_name = 'fred'
-    initial_position = (1, 1)
-    test_token = CreatureToken(token_name, initial_position, {})
-    tile_set = ['E', 'F', 'W']
-    size = (5, 5)
-    test_map = Room(5678, size, tile_set)
-    movement = (1, -1)
-
-    test_map.add_token(test_token)
-    test_map.move_token(token_name, movement)
-
-    assert test_map.tokens[token_name].position[0] == initial_position[0] + movement[0]
-    assert test_map.tokens[token_name].position[1] == initial_position[1] + movement[1]
-
-
-def test_path_finding():
-    pass

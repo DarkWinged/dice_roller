@@ -123,37 +123,29 @@ class Dice:
         else:
             return True
 
-    def roll(self, verbose: bool = None, **keywords) -> (int, str):
-        """
-        :keyword modifier: int
-        """
-        modifier = 'modifier'
+    def roll(self, *, verbose: bool = None, modifier: int = None) -> (int, str):
         if verbose:
             result, verbose_result = roll_verbose(self.rand_gen, self.number, self.size)
-            if modifier in keywords and type(keywords[modifier] is int):
-                result += keywords[modifier]
-                verbose_result = f'{verbose_result}. Modifier: {keywords[modifier]}'
+            if modifier:
+                result += modifier
+                verbose_result = f'{verbose_result}. Modifier: {modifier}'
             return result, verbose_result
         else:
-            if modifier in keywords and type(keywords[modifier] is int):
-                return keywords[modifier] + roll(self.rand_gen, self.number, self.size)
+            if modifier:
+                return modifier + roll(self.rand_gen, self.number, self.size)
             return roll(self.rand_gen, self.number, self.size), ''
 
-    def roll_advantage(self, advantage: Advantage = None, verbose: bool = None, **keywords) -> (int, str):
-        """
-        :keyword modifier: int
-        """
-        modifier = 'modifier'
+    def roll_advantage(self, *, advantage: Advantage = None, verbose: bool = None, modifier: int = None) -> (int, str):
         if advantage is None:
             advantage = Advantage.no
         if verbose:
             result, verbose_result = roll_advantage_verbose(self.rand_gen, self.number, self.size, advantage)
-            if modifier in keywords and type(keywords[modifier] is int):
-                result += keywords[modifier]
-                verbose_result = f'{verbose_result}. Modifier: {keywords[modifier]}'
+            if modifier:
+                result += modifier
+                verbose_result = f'{verbose_result}. Modifier: {modifier}'
             return result, verbose_result
         else:
-            if modifier in keywords and type(keywords[modifier] is int):
-                return keywords[modifier] + roll_advantage(self.rand_gen, self.number, self.size, advantage)
+            if modifier:
+                return modifier + roll_advantage(self.rand_gen, self.number, self.size, advantage)
             else:
                 return roll_advantage(self.rand_gen, self.number, self.size, advantage), ''
