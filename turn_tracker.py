@@ -5,8 +5,12 @@ from map_token import CreatureToken
 class TurnTracker:
     def __init__(self, seed: int):
         self._tokens: dict[str, CreatureToken] = {}
-        self._initiative_order = dict[float, str] = {}
+        self._initiative_order: dict[float, str] = {}
         self._die = Dice('1d10', seed)
+
+    @property
+    def tokens(self) -> list[CreatureToken]:
+        return list(self._tokens.values())
 
     def add_token(self, new_token: CreatureToken) -> str:
         key = ''
@@ -19,7 +23,8 @@ class TurnTracker:
         return key
 
     def add_to_initiative(self, key):
-        order: float = self._tokens[key].roll_initaiave()
+        new_token: CreatureToken = self._tokens[key]
+        order: float = new_token.roll_initiative()
         if order in self._initiative_order and self._initiative_order[order] is not key:
             roll, log_str = self._die.roll()
             order += roll/1000

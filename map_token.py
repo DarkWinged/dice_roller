@@ -4,8 +4,8 @@ from color import Color
 
 class CreatureToken:
     def __init__(self, name: str, position: tuple[int, int], sheet: CharacterSheet):
-        self._sheet = sheet
         self._name = name
+        self._sheet = sheet
         self._position = position
         self._actions = {'standard': True, 'movement': True, 'reaction': True}
 
@@ -42,6 +42,9 @@ class CreatureToken:
     def character_sheet(self): pass
 
     def convert_standard_to_movement(self): pass
+
+    def roll_initiative(self) -> int:
+        return self._sheet.roll_initiative()
 
     def render(self):
         return 'P', Color(0.6, 0.1, 0.2), Color(0.2, 0.1, 0.8)
