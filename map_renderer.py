@@ -35,16 +35,13 @@ class MapRenderer:
         else:
             self.rules[tile] = [new_rule]
 
-    def render(self, root_console: Console, tiles: str, entities: dict[str: CreatureToken]):
+    def render(self, root_console: Console, tiles: str, entities: dict[str: CreatureToken], curser: tuple[int, int],
+               highlighted: list[tuple[int, int]] = None):
+        if highlighted is None:
+            highlighted = [(-1, -1)]
         rows = tiles.split(sep='\n')
-        rows_to_cull = []
-        for index, row in enumerate(rows):
-            if row == '':
-                rows_to_cull.append(index)
-
-        rows_to_cull.sort(reverse=True)
-        for cull in rows_to_cull:
-            rows.pop(cull)
+        while '' in rows:
+            rows.remove('')
 
         height = len(rows)
         width = len(rows[0])
@@ -58,14 +55,24 @@ class MapRenderer:
                 if tile in self.rules.keys():
                     foreground: Color
                     background: Color
+                    inverted = False
+                    shifted = 0
+                    if f'({x},{y})' == f'({curser[0]},{curser[1]})':
+                        inverted = True
+                    if (x, y) in highlighted:
+                        shifted = 1
                     if f'({x},{y})' in entities.keys():
                         tile, foreground, background = entities[f'({x},{y})'].render()
                         root_console.print(x=x+x_offset, y=y+y_offset, string=tile,
-                                           fg=foreground.rgb(invert=True), bg=background.rgb(invert=True))
+                                           fg=foreground.rgb(invert=inverted, shift=shifted),
+                                           bg=background.rgb(invert=inverted, shift=shifted)
+                                           )
                     else:
                         tile, foreground, background = self.apply_rules((x, y), (width, height), rows)
                         root_console.print(x=x+x_offset, y=y+y_offset, string=tile,
-                                           fg=foreground.rgb(), bg=background.rgb())
+                                           fg=foreground.rgb(invert=inverted, shift=shifted),
+                                           bg=background.rgb(invert=inverted, shift=shifted)
+                                           )
 
     def apply_rules(self, position: tuple[int, int], limits: tuple[int, int], rows: list[str]) ->\
             (str, Color, Color):
@@ -90,8 +97,6 @@ class MapRenderer:
             else:
                 sample = f'{sample}f'
 
-        if x == 7 and y == 0:
-            print((x, y), samples)
         for rule in rules:
             if sample in rule:
                 return rule[sample], rule['foreground'], rule['background']

@@ -19,6 +19,10 @@ class Tile:
             self._icon = tile_type['icon']
         else:
             self._icon = 0
+        if 'description' in tile_type:
+            self._description = tile_type['description']
+        else:
+            self._description = 'err: no description found'
 
     @property
     def icon(self) -> int:
@@ -42,6 +46,10 @@ class Tile:
     @property
     def passable(self) -> bool:
         return self._passable
+
+    @property
+    def description(self):
+        return self._description
 
     @property
     def tokens_list(self) -> dict[str, CreatureToken]:

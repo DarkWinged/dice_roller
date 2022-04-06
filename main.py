@@ -1,17 +1,18 @@
+from __future__ import annotations
 import argparse
 import threading
 import time
 
 import tcod
-from tcod import Console
 from tcod.tileset import Tileset
 
 from character_sheet import CharacterSheet, StatBlock
 from character_sheet.enums import ability_score_iterator, AbilityScore
 from color import Color
+from game_state import GameState
 from map_renderer import MapRenderer
 from map_token import CreatureToken
-from menu import Menu
+from menu import MainMenu, Menu, MovementMenu
 from room import Room
 from tile import Tile
 from turn_tracker import TurnTracker
@@ -26,19 +27,17 @@ def init_parser():
 
 def init_game():
     room = init_room()
-    renderer = init_renderer()
+    player = init_player(room.tiles)
     tcod_tile_set = tcod.tileset.load_tilesheet(
         "assets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
 
-    player = init_player(room.tiles)
-
-    return renderer, room, tcod_tile_set, player
+    return init_renderer(), room, tcod_tile_set, player, init_tracker(player)
 
 
 def init_room():
     game_tile_set = {
-        'E': {'icon': -1, 'description': 'An empty void...'},
+        'E': {'icon': -1, 'passable': False, 'description': 'An empty void...'},
         'F': {'icon': 0, 'description': 'A patch of smooth stone floor.'},
         'W': {'icon': 1, 'passable': False, 'description': 'A solid brick wall.'},
         'R': {'icon': 2, 'movement_cost': 2, 'description': 'A pile of rubble littering the floor.'},
@@ -85,7 +84,7 @@ def init_renderer():
     renderer.add_rule('U', 'a', renderer.block_symbols[4], foreground=wall_fg, background=wall_bg)
     renderer.add_rule('D', 'a', renderer.block_symbols[3], foreground=wall_fg, background=wall_bg)
     renderer.add_rule('E', 'a', ' ', foreground=wall_fg, background=wall_bg)
-    renderer.position = (17, 0)
+    renderer.position = (17, 1)
     return renderer
 
 
@@ -102,40 +101,90 @@ def init_player(tiles: dict[tuple[int, int], Tile]):
     return CreatureToken('player_name', player_start, player_sheet)
 
 
-def quit_game(current_game_state: dict[str, bool]) -> None:
+def init_tracker(token: CreatureToken):
+    new_tracker = TurnTracker(1234)
+    new_tracker.add_token(token)
+    return new_tracker
+
+
+def quit_game(current_game_state: GameState) -> None:
     print('Shutting down game')
-    current_game_state['running'] = False
+    current_game_state.running = False
 
 
-def move_token(creature: CreatureToken, map: Room) -> None:
-    pass
+def open_movement_menu(current_game_state: GameState) -> None:
+    current_game_state.menus['selection'].curser = current_game_state.player.position
+    current_game_state.menus['main'].deactivate()
+    current_game_state.menus['selection'].activate()
 
 
-def render_loop(current_game_state: dict[str, bool], console: Console, menu: Menu, room: Room, renderer: MapRenderer, tracker: TurnTracker):
-    if current_game_state['fps_uncapped']:
+def cancel_selection(current_game_state: GameState) -> None:
+    current_game_state.menus['selection'].deactivate()
+    current_game_state.menus['main'].activate()
+
+
+def confirm_selection(current_game_state: GameState) -> None:
+    movement_range = current_game_state.rooms[current_game_state.current_room].flood_fill(
+        current_game_state.player.position,
+        current_game_state.player.speed
+    )
+    if current_game_state.menus['selection'].curser in movement_range:
+        current_game_state.player.position = current_game_state.menus['selection'].curser
+        current_game_state.menus['selection'].deactivate()
+        current_game_state.menus['main'].activate()
+
+
+def render_loop(current_game_state: GameState, void: None = None):
+    if current_game_state.fps_uncapped:
         fps = 1000000
-    elif current_game_state['fps']:
-        fps = current_game_state['fps']
+    elif current_game_state.fps:
+        fps = current_game_state.fps
     else:
         fps = 30
     time_delta = 1.0 / fps
     t1, t2 = 1.0, 2.0
 
-    while current_game_state['running']:
-        menu.render(console)
+    while current_game_state.running:
+        console = current_game_state.console
+        renderer = current_game_state.renderer
+        room = current_game_state.rooms[current_game_state.current_room]
+        menu_names = current_game_state.menus.keys()
+        menus: list[Menu] = [m for m in current_game_state.menus.values() if m.activated]
+        curser = (-1, -1)
+        highlighted = [curser]
+        for menu_to_render in menus:
+            menu_to_render.render(console)
+            if 'selection' in menu_names and menu_to_render is current_game_state.menus['selection']:
+                curser = menu_to_render.curser
+                highlighted = current_game_state.rooms[current_game_state.current_room].flood_fill(
+                    current_game_state.player.position,
+                    current_game_state.player.speed
+                )
+                hovered_tile = current_game_state.rooms[current_game_state.current_room].tiles[curser].description
+                x, y = menu_to_render.position
+                console.print(x=x, y=y, string=f'Tile Description: {hovered_tile}')
         tokens = {}
         for t in tracker.tokens:
             tokens[f'({t.position[0]},{t.position[1]})'] = t
-        renderer.render(console, room.stringify(), tokens)
+        renderer.render(console, room.stringify(), tokens, curser, highlighted)
         t2 = time.time()
-        delta_time = 1.0/(t2 - t1)
-        console.print(x=0, y=0, string=f'FPS:{delta_time: 0.2f}')
+        delta_time = 1.0 / (t2 - t1)
+
+        if delta_time >= fps / 2:
+            fps_color = (255, 255, 255)
+        elif delta_time >= fps / 5:
+            fps_color = (255, 255, 0)
+        else:
+            fps_color = (255, 0, 0)
+
+        console.print(x=int(console.width / 2), y=0, string=f'FPS:{delta_time: 0.2f}', fg=fps_color, alignment=2)
         t1 = time.time()
         time.sleep(time_delta)
         console.clear()
 
 
-def game_loop(current_game_state: dict[str, any], console: Console, tcod_tile_set: Tileset):
+def game_loop(current_game_state: GameState, tcod_tile_set: Tileset):
+    console = current_game_state.console
     with tcod.context.new_terminal(
             console.width,
             console.height,
@@ -143,34 +192,11 @@ def game_loop(current_game_state: dict[str, any], console: Console, tcod_tile_se
             title="Yet Another Roguelike Game",
             vsync=True,
     ) as context:
-
-        while current_game_state['running']:
-
+        while current_game_state.running:
+            menus: list[Menu] = [m for m in current_game_state.menus.values() if m.activated]
             context.present(console)
-
-            for event in tcod.event.wait(1.0 / current_game_state['fps']):
-                context.convert_event(event)
-                match event:
-                    case tcod.event.Quit():
-                        quit_game(current_game_state)
-                    case tcod.event.KeyDown():
-                        match event.sym:
-                            case tcod.event.K_UP:
-                                menu.curser_up()
-                            case tcod.event.K_DOWN:
-                                menu.curser_down()
-                            case tcod.event.K_RETURN:
-                                print(menu.menu_options[menu.curser_key])
-                                menu.select()
-                            case tcod.event.K_ESCAPE:
-                                quit_game(current_game_state)
-                        print(f"KeyDown: {event}")
-                    case tcod.event.MouseButtonDown():
-                        print(f"MouseButtonDown: {event}")
-                    case tcod.event.MouseMotion():
-                        print(f"MouseMotion: {event}")
-                    case tcod.event.Event() as event:
-                        print(event)
+            for menu_to_process in menus:
+                menu_to_process.process(current_game_state.fps, context)
 
 
 if __name__ == '__main__':
@@ -185,20 +211,35 @@ if __name__ == '__main__':
         screen_width, screen_height = [int(index) for index in init_window_size]
 
     root_console = tcod.Console(screen_width, screen_height, order="F")
-    game_state = {'running': True, 'fps': 30, 'fps_uncapped': False}
-    game_renderer, game_room, game_tcod_tile_set, player_token = init_game()
+    game_renderer, game_room, game_tcod_tile_set, player_token, tracker = init_game()
+    game_state = GameState(
+        True,
+        30,
+        False,
+        {},
+        [game_room],
+        0,
+        tracker,
+        player_token,
+        game_renderer,
+        root_console
+    )
 
-    menu = Menu((1, 1))
-    menu.add_command(game_state, name='quit', command=quit_game)
-    menu.add_command(player_token, game_room, name='move', command=move_token)
+    main_menu = MainMenu((1, 1))
+    main_menu.add_command(game_state, name='quit', command=quit_game)
+    main_menu.add_command(game_state, name='move', command=open_movement_menu)
+    selection = MovementMenu((17, 20))
+    selection.add_command(game_state, name='quit', command=quit_game)
+    selection.add_command(game_state, name='cancel', command=cancel_selection)
+    selection.add_command(game_state, name='confirm', command=confirm_selection)
 
-    tracker = TurnTracker(1234)
-    tracker.add_token(player_token)
+    game_state.menus['main'] = main_menu
+    game_state.menus['selection'] = selection
 
-    render_thread = threading.Thread(target=render_loop,
-                                     args=(game_state, root_console, menu, game_room, game_renderer, tracker))
-    control_thread = threading.Thread(target=game_loop, args=(game_state, root_console, game_tcod_tile_set))
+    render_thread = threading.Thread(target=render_loop, args=(game_state, None))
+    control_thread = threading.Thread(target=game_loop, args=(game_state, game_tcod_tile_set))
 
+    main_menu.activate()
     render_thread.start()
     control_thread.start()
     control_thread.join()

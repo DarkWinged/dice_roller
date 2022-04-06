@@ -80,10 +80,6 @@ class Room:
         new_room = Room(seed, size, tile_set.keys(), tiles)
         return new_room
 
-    @property
-    def tokens(self):
-        return self._tokens
-
     def stringify(self):
         string = ''
         for y in range(self._size[1]):

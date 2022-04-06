@@ -1,4 +1,3 @@
-
 class Color:
     def __init__(self, r: float, g: float, b: float, /):
         self._r = r
@@ -31,7 +30,8 @@ class Color:
 
 def constrain(color_val: float, /) -> int:
     color_val = color_val * 255
-    color_val %= 255
+    if color_val > 255:
+        color_val %= 255
     while color_val < 0:
-        color_val + 255
+        color_val += 255
     return int(color_val)
