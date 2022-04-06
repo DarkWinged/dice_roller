@@ -108,6 +108,9 @@ class CharacterSheet:
         self.inventory.append(self.equipment[slot])
         self.equipment[slot] = replacement
 
+    def roll_initiative(self):
+        return self.dice['1d20'].roll(modifier=self.ability_scores.dex_mod)
+
     def attack(self, target_ac: int, weapon_slot: EquipmentSlot = None) -> tuple[bool, int]:
         modifier = self.ability_scores.str_mod
         if (weapon_slot is EquipmentSlot.hand_r or weapon_slot is EquipmentSlot.hand_l) and \
@@ -145,3 +148,7 @@ class CharacterSheet:
                     if damage < 1:
                         damage = 1
         self._hp -= damage
+
+    def __str__(self):
+        return f'CharacterSheet{self.ability_scores, self.race, self.role, self.dice, self.equipment, self.inventory}, ' \
+               f'{self._max_hp, self._hp} '
