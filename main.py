@@ -1,4 +1,3 @@
-from __future__ import annotations
 import argparse
 import threading
 import time
@@ -13,6 +12,7 @@ from game_state import GameState
 from map_renderer import MapRenderer
 from map_token import CreatureToken
 from menu import MainMenu, Menu, MovementMenu
+from menu_commands import quit_game, open_movement_menu, cancel_selection, confirm_selection
 from room import Room
 from tile import Tile
 from turn_tracker import TurnTracker
@@ -95,7 +95,7 @@ def init_player(tiles: dict[tuple[int, int], Tile]):
     for score in ability_score_iterator():
         scores[score] = 10
         race_modifiers[score] = 0
-    race_modifiers[AbilityScore.STR] += 4
+    race_modifiers[AbilityScore.STR] = 0
     race = {'ability_mod': race_modifiers}
     player_sheet = CharacterSheet(StatBlock(scores), race, 'fighter')
     return CreatureToken('player_name', player_start, player_sheet)
@@ -105,33 +105,6 @@ def init_tracker(token: CreatureToken):
     new_tracker = TurnTracker(1234)
     new_tracker.add_token(token)
     return new_tracker
-
-
-def quit_game(current_game_state: GameState) -> None:
-    print('Shutting down game')
-    current_game_state.running = False
-
-
-def open_movement_menu(current_game_state: GameState) -> None:
-    current_game_state.menus['selection'].curser = current_game_state.player.position
-    current_game_state.menus['main'].deactivate()
-    current_game_state.menus['selection'].activate()
-
-
-def cancel_selection(current_game_state: GameState) -> None:
-    current_game_state.menus['selection'].deactivate()
-    current_game_state.menus['main'].activate()
-
-
-def confirm_selection(current_game_state: GameState) -> None:
-    movement_range = current_game_state.rooms[current_game_state.current_room].flood_fill(
-        current_game_state.player.position,
-        current_game_state.player.speed
-    )
-    if current_game_state.menus['selection'].curser in movement_range:
-        current_game_state.player.position = current_game_state.menus['selection'].curser
-        current_game_state.menus['selection'].deactivate()
-        current_game_state.menus['main'].activate()
 
 
 def render_loop(current_game_state: GameState, void: None = None):
@@ -153,7 +126,6 @@ def render_loop(current_game_state: GameState, void: None = None):
         curser = (-1, -1)
         highlighted = [curser]
         for menu_to_render in menus:
-            menu_to_render.render(console)
             if 'selection' in menu_names and menu_to_render is current_game_state.menus['selection']:
                 curser = menu_to_render.curser
                 highlighted = current_game_state.rooms[current_game_state.current_room].flood_fill(
@@ -161,8 +133,9 @@ def render_loop(current_game_state: GameState, void: None = None):
                     current_game_state.player.speed
                 )
                 hovered_tile = current_game_state.rooms[current_game_state.current_room].tiles[curser].description
-                x, y = menu_to_render.position
-                console.print(x=x, y=y, string=f'Tile Description: {hovered_tile}')
+                menu_to_render.render(hovered_tile)
+            else:
+                menu_to_render.render()
         tokens = {}
         for t in tracker.tokens:
             tokens[f'({t.position[0]},{t.position[1]})'] = t
@@ -193,7 +166,7 @@ def game_loop(current_game_state: GameState, tcod_tile_set: Tileset):
             vsync=True,
     ) as context:
         while current_game_state.running:
-            menus: list[Menu] = [m for m in current_game_state.menus.values() if m.activated]
+            menus: list[Menu] = [m for m in current_game_state.menus.values() if m.activated and not m.paused]
             context.present(console)
             for menu_to_process in menus:
                 menu_to_process.process(current_game_state.fps, context)
@@ -225,10 +198,10 @@ if __name__ == '__main__':
         root_console
     )
 
-    main_menu = MainMenu((1, 1))
+    main_menu = MainMenu((1, 1), (14, 20), root_console)
     main_menu.add_command(game_state, name='quit', command=quit_game)
     main_menu.add_command(game_state, name='move', command=open_movement_menu)
-    selection = MovementMenu((17, 20))
+    selection = MovementMenu((17, 20), (40, 15), root_console)
     selection.add_command(game_state, name='quit', command=quit_game)
     selection.add_command(game_state, name='cancel', command=cancel_selection)
     selection.add_command(game_state, name='confirm', command=confirm_selection)
