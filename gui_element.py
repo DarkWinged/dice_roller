@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 import tcod
 
 
-class ElementGUI(ABC):
+class GuiElement(ABC):
     @property
     @abstractmethod
     def activated(self) -> bool: pass

@@ -7,7 +7,7 @@ import tcod
 from tcod.context import Context
 
 from color import Color
-from gui_element import ElementGUI
+from gui_element import GuiElement
 
 
 @dataclass
@@ -18,7 +18,7 @@ class MenuCommand:
     keyword_args: dict[any, any]
 
 
-class Menu(ElementGUI):
+class Menu(GuiElement):
     @property
     @abstractmethod
     def curser(self) -> (int, int): pass
@@ -108,6 +108,10 @@ class MovementMenu(Menu):
     @property
     def position(self) -> tuple[int, int]:
         return self._position
+
+    @position.setter
+    def position(self, new_position: tuple[int, int]):
+        self._position = new_position
 
     @property
     def activated(self):
@@ -275,6 +279,16 @@ class MainMenu(Menu):
     def deactivate(self):
         self._activated = False
 
+    def curser_up(self):
+        self._curser = (self._curser[0], self._curser[1] - 1)
+        if self._curser[1] < 0:
+            self._curser = (self._curser[0], len(self.menu_options) - 1)
+
+    def curser_down(self):
+        self._curser = (self._curser[0], self._curser[1] + 1)
+        if self._curser[1] >= len(self.menu_options):
+            self._curser = (self._curser[0], 0)
+
     @property
     def position(self) -> tuple[int, int]:
         return self._position
@@ -308,7 +322,7 @@ class MainMenu(Menu):
                                 string=f" {'_' * spacer}MENU{'_' * spacer}")
             color: Color
             for item, menu_item in enumerate(self.menu_options.keys()):
-                if item == self._curser[1]:
+                if item == self._curser[1] and not self.paused:
                     color = Color(0.0, 1.0, 0.0)
                 else:
                     color = Color(1.0, 1.0, 1.0)
@@ -339,8 +353,10 @@ class MainMenu(Menu):
                         match event.sym:
                             case tcod.event.K_UP:
                                 self.curser_up()
+                                print(self.curser)
                             case tcod.event.K_DOWN:
                                 self.curser_down()
+                                print(self.curser)
                             case tcod.event.K_RETURN:
                                 print(
                                     self.menu_options[self.curser_key].name,
