@@ -62,7 +62,7 @@ def init_room():
 
 
 def init_renderer():
-    renderer = MapRenderer()
+    renderer = MapRenderer((0, 0), (20, 20))
     wall_fg, wall_bg = Color(0.1, 0.2, 0.3), Color(0.1, 0.1, 0.2)
     renderer.add_rule('W', 'fftt', renderer.pipe_symbols[0], foreground=wall_fg, background=wall_bg)
     renderer.add_rule('W', 'tfft', renderer.pipe_symbols[1], foreground=wall_fg, background=wall_bg)
@@ -120,26 +120,17 @@ def render_loop(current_game_state: GameState, void: None = None):
     while current_game_state.running:
         console = current_game_state.console
         renderer = current_game_state.renderer
-        room = current_game_state.rooms[current_game_state.current_room]
         menu_names = current_game_state.menus.keys()
         menus: list[Menu] = [m for m in current_game_state.menus.values() if m.activated]
-        curser = (-1, -1)
-        highlighted = [curser]
         for menu_to_render in menus:
             if 'selection' in menu_names and menu_to_render is current_game_state.menus['selection']:
-                curser = menu_to_render.curser
-                highlighted = current_game_state.rooms[current_game_state.current_room].flood_fill(
-                    current_game_state.player.position,
-                    current_game_state.player.speed
-                )
-                hovered_tile = current_game_state.rooms[current_game_state.current_room].tiles[curser].description
-                menu_to_render.render(hovered_tile)
+                renderer.curser = menu_to_render.curser
+                if menu_to_render.curser in current_game_state.rooms[current_game_state.current_room].tiles and renderer.activated:
+                    hovered_tile = current_game_state.rooms[current_game_state.current_room].tiles[menu_to_render.curser].description
+                    menu_to_render.render(hovered_tile)
             else:
                 menu_to_render.render()
-        tokens = {}
-        for t in tracker.tokens:
-            tokens[f'({t.position[0]},{t.position[1]})'] = t
-        renderer.render(console, room.stringify(), tokens, curser, highlighted)
+        renderer.render()
         t2 = time.time()
         delta_time = 1.0 / (t2 - t1)
 
@@ -201,13 +192,17 @@ if __name__ == '__main__':
     main_menu = MainMenu((1, 1), (14, 20), root_console)
     main_menu.add_command(game_state, name='quit', command=quit_game)
     main_menu.add_command(game_state, name='move', command=open_movement_menu)
-    selection = MovementMenu((17, 20), (40, 15), root_console)
+    selection = MovementMenu((16, 22), (40, 10), root_console)
     selection.add_command(game_state, name='quit', command=quit_game)
     selection.add_command(game_state, name='cancel', command=cancel_selection)
     selection.add_command(game_state, name='confirm', command=confirm_selection)
 
     game_state.menus['main'] = main_menu
     game_state.menus['selection'] = selection
+    game_state.renderer.canvas = root_console
+    game_state.renderer.activate()
+    game_state.renderer.load_tiles(game_state.rooms[0].stringify())
+    game_state.renderer.load_entities(game_state.turn_tracker.tokens)
 
     render_thread = threading.Thread(target=render_loop, args=(game_state, None))
     control_thread = threading.Thread(target=game_loop, args=(game_state, game_tcod_tile_set))
