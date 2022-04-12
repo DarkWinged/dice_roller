@@ -26,11 +26,11 @@ class GuiElement(ABC):
 
     @property
     @abstractmethod
-    def position(self) -> (int, int): pass
+    def position(self) -> tuple[int, int]: pass
 
     @position.setter
     @abstractmethod
-    def position(self, new_pos: (int, int)): pass
+    def position(self, new_pos: tuple[int, int]): pass
 
     @property
     @abstractmethod

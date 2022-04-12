@@ -11,32 +11,32 @@ class MapRenderer(GuiElement):
     pipe_symbols = ['╗', '╝', '╚', '╔', '╩', '╦', '╣', '╠', '╬', '═', '║']
     line_symbols = ['┐', '┘', '└', '┌', '┴', '┬', '┤', '├', '┼', '─', '│']
 
-    def __init__(self, position: (int, int), size: (int, int), console: Console = None):
+    def __init__(self, position: tuple[int, int], size: tuple[int, int], console: Console = None):
         self._width, self._height = size
         self._position = position
         self._paused = False
         self._activated = False
         self.rules = {}
         self._console = console
-        self._tiles: {(int, int): (str, Color, Color)} = {}
-        self._entities: {(int, int): (str, Color, Color)} = {}
-        self._curser: (int, int) = None
-        self._highlighted_tiles: [(int, int)] = None
+        self._tiles: dict[tuple[int, int]: tuple[str, Color, Color]] = {}
+        self._entities:  dict[tuple[int, int]: tuple[str, Color, Color]] = {}
+        self._curser: tuple[int, int] = None
+        self._highlighted_tiles: list[tuple[int, int]] = None
 
     @property
-    def highlighted_tiles(self) -> [(int, int)]:
+    def highlighted_tiles(self) -> list[tuple[int, int]]:
         return self._highlighted_tiles
 
     @highlighted_tiles.setter
-    def highlighted_tiles(self, new_highlighted_tiles: [(int, int)]):
+    def highlighted_tiles(self, new_highlighted_tiles: list[tuple[int, int]]):
         self._highlighted_tiles = new_highlighted_tiles
 
     @property
-    def curser(self) -> (int, int):
+    def curser(self) -> tuple[int, int]:
         return self._curser
 
     @curser.setter
-    def curser(self, new_curser: (int, int)):
+    def curser(self, new_curser: tuple[int, int]):
         self._curser = new_curser
 
     @property
@@ -124,10 +124,7 @@ class MapRenderer(GuiElement):
                     if x < len(rows[y]):
                         tile = rows[y][x]
                         if tile in self.rules.keys():
-                            foreground: Color
-                            background: Color
-                            tile, foreground, background = self.apply_rules((x, y), (width, height), rows)
-                            self._tiles[(x, y)] = (tile, foreground, background)
+                            self._tiles[(x, y)] = self.apply_rules((x, y), (width, height), rows)
                     else:
                         rule = self.rules['E'][0]
                         self._tiles[(x, y)] = (rule['a'], rule['foreground'], rule['background'])
@@ -139,41 +136,65 @@ class MapRenderer(GuiElement):
     def render(self):
         if self.activated:
             if self._highlighted_tiles is None:
-                highlighted_tiles = [(-1, -1)]
+                highlighted_tiles = []
             else:
                 highlighted_tiles = self._highlighted_tiles
-            if self._curser is None:
-                curser = (-1, -1)
-            else:
-                curser = self._curser
+            curser = self.curser
+
             x_offset, y_offset = self.position
 
             for position in self._tiles.keys():
                 x, y = position
                 tile, foreground, background = self._tiles[position]
-                if f'({x},{y})' == f'({curser[0]},{curser[1]})':
-                    inverted = True
-                else:
-                    inverted = False
-                if (x, y) in highlighted_tiles:
-                    shifted = 1
-                else:
-                    shifted = 0
-                if position in self._entities.keys():
+                self._console.print(x=x + x_offset,
+                                    y=y + y_offset,
+                                    string=tile,
+                                    fg=foreground.rgb(),
+                                    bg=background.rgb()
+                                    )
+
+            if len(highlighted_tiles) > 0:
+                for position in highlighted_tiles:
+                    x, y = position
+                    tile, foreground, background = self._tiles[position]
+                    self._console.print(x=x + x_offset,
+                                        y=y + y_offset,
+                                        string=tile,
+                                        fg=foreground.rgb(shift=1),
+                                        bg=background.rgb(shift=1)
+                                        )
+
+            if len(self._entities) > 0:
+                for position in self._entities.keys():
+                    x, y = position
                     tile, foreground, background = self._entities[position]
                     self._console.print(x=x + x_offset,
                                         y=y + y_offset,
                                         string=tile,
-                                        fg=foreground.rgb(invert=inverted, shift=shifted),
-                                        bg=background.rgb(invert=inverted, shift=shifted)
+                                        fg=foreground.rgb(),
+                                        bg=background.rgb()
                                         )
+
+            if curser is not None:
+                x, y = curser
+                if curser in self._entities:
+                    tile, foreground, background = self._entities[curser]
+                elif curser in self._tiles:
+                    tile, foreground, background = self._tiles[curser]
                 else:
-                    self._console.print(x=x + x_offset,
-                                        y=y + y_offset,
-                                        string=tile,
-                                        fg=foreground.rgb(invert=inverted, shift=shifted),
-                                        bg=background.rgb(invert=inverted, shift=shifted)
-                                        )
+                    tile = self.block_symbols[0]
+                    foreground = Color(1.0, 1.0, 1.0)
+                    background = Color(0.0, 0.0, 0.0)
+                if curser in highlighted_tiles:
+                    shifted = 1
+                else:
+                    shifted = 0
+                self._console.print(x=x + x_offset,
+                                    y=y + y_offset,
+                                    string=tile,
+                                    fg=foreground.rgb(invert=True, shift=shifted),
+                                    bg=background.rgb(invert=True, shift=shifted)
+                                    )
 
     def apply_rules(self, position: tuple[int, int], limits: tuple[int, int], rows: list[list[str]]) -> \
             (str, Color, Color):
