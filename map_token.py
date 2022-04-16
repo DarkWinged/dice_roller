@@ -13,6 +13,10 @@ class CreatureToken:
     def name(self) -> str:
         return self._name
 
+    @name.setter
+    def name(self, new_name: str):
+        self._name = new_name
+
     @property
     def position(self) -> tuple[int, int]:
         return self._position
@@ -59,3 +63,7 @@ class CreatureToken:
 
     def __str__(self) -> str:
         return f'map_token{self._name, self._position, self._actions, self.character_sheet}'
+
+    @property
+    def sheet(self):
+        return self._sheet

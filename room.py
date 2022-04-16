@@ -1,4 +1,3 @@
-from map_token import CreatureToken
 from tile import Tile
 
 
@@ -54,7 +53,7 @@ def get_neighbors(point: tuple[int, int]) -> tuple[tuple[int, int], list[tuple[i
 
 
 class Room:
-    def __init__(self, seed: int, size: tuple[int, int], tile_set: list[str],
+    def __init__(self, seed: int, size: tuple[int, int], tile_set: dict[str, dict[str, any]],
                  tile_map: dict[tuple[int, int], Tile] = None):
         if tile_map is None:
             self._tiles = {}
@@ -65,9 +64,10 @@ class Room:
             self._tiles = tile_map
         self._seed = seed
         self._size = size
-        self._tile_set: dict[int, str] = {}
-        for index, icon in enumerate(tile_set):
-            self._tile_set[index - 1] = icon
+        self._tile_set = tile_set
+        self._tile_set_icons: list[int, str] = {}
+        for index, icon in enumerate(tile_set.keys()):
+            self._tile_set_icons[index - 1] = icon
 
     @classmethod
     def new(cls, seed: int, tile_set: dict[str, dict[str, any]], tile_map: list[list[str]]):
@@ -77,17 +77,17 @@ class Room:
         for y in range(len(tile_map)):
             for x in range(len(tile_map[0])):
                 tiles[(x, y)] = Tile((x, y), tile_set[tile_map[y][x]])
-        new_room = Room(seed, size, tile_set.keys(), tiles)
+        new_room = Room(seed, size, tile_set, tiles)
         return new_room
 
-    def stringify(self):
+    def stringify(self) -> str:
         string = ''
         for y in range(self._size[1]):
             for x in range(self._size[0]):
-                if (x, y) in self._tiles and self._tiles[(x, y)].icon in self._tile_set:
-                    tile_icon = self._tile_set[self._tiles[(x, y)].icon]
+                if (x, y) in self._tiles and self._tiles[(x, y)].icon in self._tile_set_icons:
+                    tile_icon = self._tile_set_icons[self._tiles[(x, y)].icon]
                 else:
-                    tile_icon = self._tile_set[-1]
+                    tile_icon = self._tile_set_icons[-1]
                 string = f'{string}{tile_icon}'
             string = f'{string}\n'
         return string
@@ -122,3 +122,11 @@ class Room:
 
     def get_tokens_in_range(self):
         pass
+
+    @property
+    def seed(self):
+        return self._seed
+
+    @property
+    def tile_set(self):
+        return self._tile_set

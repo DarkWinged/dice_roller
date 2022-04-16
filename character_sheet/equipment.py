@@ -46,13 +46,16 @@ class Armor(Equipment):
     def restrictions(self) -> list[str]:
         return self._restrictions
 
+    @property
+    def name(self):
+        return self._name
+
 
 class Weapon(Equipment):
     def __init__(self, name: str, equipment_slot: EquipmentSlot, roll_type: tuple[str, str], zweihand: bool,
                  restrictions: list[str] = None):
         roll_type, damage_type = roll_type
         self._name = name
-        self._equipment_name = name
         self._equipment_slot = equipment_slot
         if '+' in roll_type:
             self._die_type, self._modifier = roll_type.split(sep='+')
