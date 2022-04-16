@@ -1,12 +1,12 @@
 from __future__ import annotations
-from map_token import MapToken
+from map_token import CreatureToken
 
 
 class Tile:
 
     def __init__(self, position: tuple[int, int], tile_type: dict[str, any] = None):
         self._position = position
-        self._token_list: dict[str, MapToken] = {}
+        self._token_list: dict[str, CreatureToken] = {}
         if 'movement_cost' in tile_type:
             self._movement_cost = tile_type['movement_cost']
         else:
@@ -19,6 +19,10 @@ class Tile:
             self._icon = tile_type['icon']
         else:
             self._icon = 0
+        if 'description' in tile_type:
+            self._description = tile_type['description']
+        else:
+            self._description = 'err: no description found'
 
     @property
     def icon(self) -> int:
@@ -27,6 +31,10 @@ class Tile:
     @property
     def position(self) -> tuple[int, int]:
         return self._position
+
+    @position.setter
+    def position(self, new_position: tuple(int, int)):
+        self._position = new_position
 
     @property
     def movement_cost(self) -> int:
@@ -40,13 +48,17 @@ class Tile:
         return self._passable
 
     @property
-    def tokens_list(self) -> dict[str, MapToken]:
+    def description(self):
+        return self._description
+
+    @property
+    def tokens_list(self) -> dict[str, CreatureToken]:
         return self._token_list
 
-    def add_token(self, new_token: MapToken):
+    def add_token(self, new_token: CreatureToken):
         self._token_list[new_token.name] = new_token
 
-    def get_token(self, token_name: str) -> MapToken:
+    def get_token(self, token_name: str) -> CreatureToken:
         if token_name in self._token_list:
             return self._token_list[token_name]
 

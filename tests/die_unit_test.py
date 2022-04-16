@@ -34,8 +34,17 @@ def test_invalid_dice():
 def test_roll_in_range():
     new_die = Dice('1d20')
     for roll in range(1000):
-        result = new_die.roll()
-        assert 1 <= result <= new_die.size
+        result_roll, result_str = new_die.roll()
+        assert 1 <= result_roll <= new_die.size
+        assert result_str == ''
+
+
+def test_verbose_roll_in_range():
+    new_die = Dice('1d20')
+    for roll in range(1000):
+        result_roll, result_str = new_die.roll(verbose=True)
+        assert 1 <= result_roll <= new_die.size
+        assert result_str == f'Total:{result_roll}, Rolls:({result_roll})'
 
 
 def test_roll_reproduction():
@@ -49,16 +58,20 @@ def test_advantageous_roll():
     die_1 = Dice('1d10', 5678)
     die_2 = Dice.new(die_1.number, die_1.size, die_1._seed)
     for roll in range(1000):
-        roll_1, roll_2 = die_2.roll(), die_2.roll()
-        assert die_1.roll_advantage(Advantage.adv) == max(roll_1, roll_2)
+        roll_result_1, roll_str_1 = die_2.roll(verbose=True)
+        roll_result_2, roll_str_2 = die_2.roll(verbose=True)
+        adv_roll, adv_str = die_1.roll_advantage(advantage=Advantage.adv)
+        assert adv_roll == max(roll_result_1, roll_result_2)
 
 
 def test_disadvantageous_roll():
     die_1 = Dice('1d100', 9012)
     die_2 = Dice.new(die_1.number, die_1.size, die_1._seed)
     for roll in range(1000):
-        roll_1, roll_2 = die_2.roll(), die_2.roll()
-        assert die_1.roll_advantage(Advantage.dis) == min(roll_1, roll_2)
+        roll_result_1, roll_str_1 = die_2.roll()
+        roll_result_2, roll_str_2 = die_2.roll()
+        adv_roll, adv_str = die_1.roll_advantage(advantage=Advantage.dis)
+        assert adv_roll == min(roll_result_1, roll_result_2)
 
 
 def test_modified_roll():
