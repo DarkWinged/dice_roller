@@ -105,10 +105,11 @@ class MapRenderer(GuiElement):
         else:
             self.rules[tile] = [new_rule]
 
-    def load_entities(self, entities: [CreatureToken]):
+    def load_entities(self, entities: list[CreatureToken]):
         self._entities = {}
         for entity in entities:
-            self._entities[entity.position] = entity.render()
+            if entity is not None:
+                self._entities[entity.position] = entity.render()
 
     def load_tiles(self, tiles: str):
         self._tiles = {}

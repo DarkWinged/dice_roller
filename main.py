@@ -11,6 +11,7 @@ from character_sheet.enums import ability_score_iterator, AbilityScore
 from color import Color
 from game_state import GameState
 from gui_element import GuiElement
+from loadable import decode_ability_score, load_races
 from map_renderer import MapRenderer
 from map_token import CreatureToken
 from menus import ListedMenu, Menu, MovementMenu
@@ -90,36 +91,6 @@ def init_renderer():
     return renderer
 
 
-def decode_ability_score(score: str) -> AbilityScore:
-    match score:
-        case "AbilityScore.STR":
-            return AbilityScore.STR
-        case "AbilityScore.CON":
-            return AbilityScore.CON
-        case "AbilityScore.DEX":
-            return AbilityScore.DEX
-        case "AbilityScore.INT":
-            return AbilityScore.INT
-        case "AbilityScore.WIS":
-            return AbilityScore.WIS
-        case "AbilityScore.CHA":
-            return AbilityScore.CHA
-
-
-def load_races():
-    races_to_return = {}
-    with open('./assets/races.json', 'r') as file:
-        races = json.JSONDecoder().decode(file.read())
-        for race_name in races.keys():
-            races_to_return[race_name] = {}
-            races_to_return[race_name]['name'] = races[race_name]['name']
-            races_to_return[race_name]['ability_mod'] = {}
-            for score in races[race_name]['ability_mod'].keys():
-                races_to_return[race_name]['ability_mod'][decode_ability_score(score)] =\
-                    races[race_name]['ability_mod'][score]
-    return races_to_return
-
-
 def init_player(tiles: dict[tuple[int, int], Tile]):
     player_start = [position for position in tiles.keys() if tiles[position].icon == 3][0]
     scores = {}
@@ -157,7 +128,7 @@ def render_loop(current_game_state: GameState, void: None = None):
         gui_elements: [GuiElement] = [m for m in current_game_state.gui_elements.values() if m.activated]
         renderer.render()
         for element_to_render in gui_elements:
-            element_to_render.render(current_game_state)
+            element_to_render.render(current_game_state.menus, current_game_state.player, current_game_state.data_table)
         for menu_to_render in menus:
             if 'selection' in menu_names and menu_to_render is current_game_state.menus['selection']:
                 renderer.curser = menu_to_render.curser
@@ -226,7 +197,6 @@ if __name__ == '__main__':
         root_console,
         {'races': load_races()}
     )
-    print(game_state.data_table['races'])
     main_menu = ListedMenu((int((root_console.width - 14)/2), 10), (14, 20), root_console)
     main_menu.add_command(game_state, name='new game', command=menu_commands.new_game)
     main_menu.add_command(game_state, name='load game', command=menu_commands.load_game)
@@ -259,7 +229,7 @@ if __name__ == '__main__':
     game_state.menus['pause'] = pause_menu
     game_state.renderer.canvas = root_console
     game_state.renderer.load_tiles(game_state.rooms[0].stringify())
-    game_state.renderer.load_entities(game_state.turn_tracker.tokens)
+    game_state.renderer.load_entities(game_state.turn_tracker.tokens.values())
 
     render_thread = threading.Thread(target=render_loop, args=(game_state, None))
     control_thread = threading.Thread(target=game_loop, args=(game_state, game_tcod_tile_set))

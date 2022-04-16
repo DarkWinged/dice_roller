@@ -1,6 +1,12 @@
-{"human": {"name": "Human", "ability_mod": {"AbilityScore.STR": 0, "AbilityScore.CON": 0, "AbilityScore.DEX": 0, "AbilityScore.INT": 0, "AbilityScore.WIS": 0, "AbilityScore.CHA": 2}},
-"elf": {"name": "Elf", "ability_mod": {"AbilityScore.STR": 0, "AbilityScore.CON": 0, "AbilityScore.DEX": 2, "AbilityScore.INT": 0, "AbilityScore.WIS": 0, "AbilityScore.CHA": 0}},
-"dwarf": {"name": "Dwarf", "ability_mod": {"AbilityScore.STR": 0, "AbilityScore.CON": 2, "AbilityScore.DEX": 0, "AbilityScore.INT": 0, "AbilityScore.WIS": 0, "AbilityScore.CHA": 0}},
-"orc": {"name": "Orc", "ability_mod": {"AbilityScore.STR": 2, "AbilityScore.CON": 0, "AbilityScore.DEX": 0, "AbilityScore.INT": 0, "AbilityScore.WIS": 0, "AbilityScore.CHA": 0}},
-"gnome": {"name": "Gnome", "ability_mod": {"AbilityScore.STR": 0, "AbilityScore.CON": 0, "AbilityScore.DEX": 0, "AbilityScore.INT": 2, "AbilityScore.WIS": 0, "AbilityScore.CHA": 0}},
-"beastfolk": {"name": "Beastfolk", "ability_mod": {"AbilityScore.STR": 0, "AbilityScore.CON": 0, "AbilityScore.DEX": 0, "AbilityScore.INT": 0, "AbilityScore.WIS": 2, "AbilityScore.CHA": 0}}}
+{"human": {"name": "Human", "ability_mod": {
+  "STR": 0, "CON": 0, "DEX": 0, "INT": 0, "WIS": 0, "CHA": 2}},
+"elf": {"name": "Elf", "ability_mod": {
+  "STR": 0, "CON": 0, "DEX": 2, "INT": 0, "WIS": 0, "CHA": 0}},
+"dwarf": {"name": "Dwarf", "ability_mod": {
+  "STR": 0, "CON": 2, "DEX": 0, "INT": 0, "WIS": 0, "CHA": 0}},
+"orc": {"name": "Orc", "ability_mod": {
+  "STR": 2, "CON": 0, "DEX": 0, "INT": 0, "WIS": 0, "CHA": 0}},
+"gnome": {"name": "Gnome", "ability_mod": {
+  "STR": 0, "CON": 0, "DEX": 0, "INT": 2, "WIS": 0, "CHA": 0}},
+"beastfolk": {"name": "Beastfolk", "ability_mod": {
+  "STR": 0, "CON": 0, "DEX": 0, "INT": 0, "WIS": 2, "CHA": 0}}}

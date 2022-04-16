@@ -63,3 +63,7 @@ class CreatureToken:
 
     def __str__(self) -> str:
         return f'map_token{self._name, self._position, self._actions, self.character_sheet}'
+
+    @property
+    def sheet(self):
+        return self._sheet

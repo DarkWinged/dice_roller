@@ -9,15 +9,19 @@ class TurnTracker:
         self._die = Dice('1d10', seed)
 
     @property
-    def tokens(self) -> list[CreatureToken]:
-        return list(self._tokens.values())
+    def tokens(self) -> dict[str, CreatureToken]:
+        return self._tokens
 
     def add_token(self, new_token: CreatureToken) -> str:
-        key = ''
-        if new_token not in self._tokens.values():
-            for iterations in range(16):
-                roll = self._die.roll()
-                key = f'{key}{roll[0]-1}'
+        if len(self._tokens.keys()) == 0:
+            key = None
+        else:
+            key = list(self._tokens.keys())[0]
+        if new_token not in self._tokens.values() or key is None:
+            while key in self._tokens.keys() or key is None:
+                for iterations in range(16):
+                    roll = self._die.roll()
+                    key = f'{key}{roll[0]-1}'
             self._tokens[key] = new_token
             self.add_to_initiative(key)
         return key
@@ -29,6 +33,9 @@ class TurnTracker:
             roll, log_str = self._die.roll()
             order += roll/1000
         self._initiative_order[order] = key
+
+    def get_token_key(self, token: CreatureToken) -> str:
+        return [key for key in self._tokens.keys() if self._tokens[key] is token][0]
 
     def remove_token(self, key: str):
         if key in self._tokens.keys():
@@ -44,3 +51,19 @@ class TurnTracker:
         for order in sorted(self._initiative_order.keys(), reverse=True):
             token_key = self._initiative_order[order]
             self._tokens[token_key].take_turn()
+
+    @property
+    def initiative_order(self):
+        return self._initiative_order
+
+    @property
+    def die(self):
+        return self._die
+
+    @initiative_order.setter
+    def initiative_order(self, value):
+        self._initiative_order = value
+
+    @tokens.setter
+    def tokens(self, value):
+        self._tokens = value

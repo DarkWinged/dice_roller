@@ -25,3 +25,4 @@ class GameState:
     renderer: MapRenderer
     console: Console
     data_table: dict[str: any]
+

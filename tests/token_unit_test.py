@@ -95,4 +95,4 @@ def test_new_map():
     assert test_room.stringify() == result
     for y, column in enumerate(tile_map):
         for x, tile in enumerate(column):
-            assert test_room._tile_set[test_room.tiles[(x, y)].icon] == tile
+            assert test_room._tile_set_icons[test_room.tiles[(x, y)].icon] == tile

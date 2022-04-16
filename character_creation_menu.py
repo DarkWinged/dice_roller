@@ -17,7 +17,8 @@ def find_max_length(keys: list[AbilityScore]) -> int:
     return max_length
 
 
-class RaceSelectionMenu(ListedMenu): pass
+class RaceSelectionMenu(ListedMenu):
+    pass
 
 
 class AbilityScoreMenu(Menu):

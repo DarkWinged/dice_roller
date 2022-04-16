@@ -1,6 +1,5 @@
 import tcod
 
-from game_state import GameState
 from gui_element import GuiElement
 from map_token import CreatureToken
 from character_sheet.enums import AbilityScore
@@ -133,15 +132,15 @@ class InfoTab(GuiElement):
 
     def fetch_player_data(self, key: str, player: CreatureToken, layer: int) -> str: pass
 
-    def render(self, current_game_state: GameState):
+    def render(self, menus: dict[str: Menu], player: CreatureToken, data_table: dict[str: any]):
         if self._activated:
             data_to_display = []
             for key, menu in self._menu_data:
-                data_to_display.append(fetch_menu_data(menu, current_game_state.menus[key], 0))
+                data_to_display.append(fetch_menu_data(menu, menus.menus[key], 0))
             for item in self._player_data:
-                data_to_display.append(self.fetch_player_data(item, current_game_state.player, 0))
+                data_to_display.append(self.fetch_player_data(item, player, 0))
             for item in self._game_data:
-                data_to_display.append(fetch_game_data(item, current_game_state.data_table[item], 0))
+                data_to_display.append(fetch_game_data(item, data_table[item], 0))
             text_to_print = ''
             for item in data_to_display:
                 if item is None:

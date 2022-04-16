@@ -1,6 +1,6 @@
+from __future__ import annotations
 import math
 from abc import abstractmethod
-from dataclasses import dataclass
 from typing import Callable
 
 import tcod
@@ -8,14 +8,7 @@ from tcod.context import Context
 
 from color import Color
 from gui_element import GuiElement
-
-
-@dataclass
-class MenuCommand:
-    name: str
-    command: Callable
-    positional_args: tuple[any]
-    keyword_args: dict[any, any]
+from menu_command import MenuCommand
 
 
 class Menu(GuiElement):
@@ -23,6 +16,7 @@ class Menu(GuiElement):
         self._curser = (0, 0)
         self._position = (0, 0)
         self._console = None
+        self.menu_options: dict[str, MenuCommand] = {}
         self._width = 0
         self._height = 0
         self._activated = False
@@ -279,7 +273,6 @@ class ListedMenu(Menu):
 
     def select(self):
         menu_command = self.menu_options[self.curser_key]
-        print(f'MenuCommand{menu_command.name, menu_command.command}')
         menu_command.command(*menu_command.positional_args, **menu_command.keyword_args)
 
     def add_command(self, *args, name: str, command: Callable, hidden: bool = None,
