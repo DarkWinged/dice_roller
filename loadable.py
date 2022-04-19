@@ -206,6 +206,8 @@ class CharacterSheetLoader(Loadable):
         sheet.dice = dice
         sheet.equipment = equipment
         sheet.inventory = inventory
+        sheet.hp = encoded['hp']
+        sheet.max_hp = encoded['max_hp']
         return sheet
 
 

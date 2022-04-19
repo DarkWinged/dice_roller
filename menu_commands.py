@@ -11,6 +11,7 @@ from info_tab import InfoTab
 from loadable import GameStateLoader, load_races
 from map_token import CreatureToken
 from menus import TextMenu
+from status_tab import StatusTab
 
 
 def quit_game(current_game_state: GameState) -> None:
@@ -62,7 +63,8 @@ def confirm_name(name: str, current_game_state: GameState) -> None:
 
 def cancel_name(current_game_state: GameState) -> None:
     current_game_state.menus['character_creation_name_text'].deactivate()
-    current_game_state.gui_elements['character_creation_text'].deactivate()
+    if 'character_creation_text' in current_game_state.gui_elements.keys():
+        current_game_state.gui_elements['character_creation_text'].deactivate()
     current_game_state.menus['main'].activate()
 
 
@@ -114,6 +116,11 @@ def confirm_ability_scores(ability_scores: dict[str: int], current_game_state: G
     current_game_state.renderer.load_tiles(current_game_state.rooms[0].stringify())
     current_game_state.renderer.load_entities(current_game_state.turn_tracker.tokens.values())
 
+    status = StatusTab((0, 0), (12, 1), current_game_state.console)
+    status.token = current_game_state.player
+    current_game_state.gui_elements['player_status'] = status
+    current_game_state.gui_elements['player_status'].activate()
+
     current_game_state.menus['play'].curser = (0, 0)
     current_game_state.menus['play'].activate()
     current_game_state.renderer.activate()
@@ -149,6 +156,11 @@ def load_game(current_game_state: GameState) -> None:
         current_game_state.renderer.load_tiles(current_game_state.rooms[0].stringify())
         current_game_state.renderer.load_entities(current_game_state.turn_tracker.tokens.values())
 
+        status = StatusTab((0, 0), (12, 1), current_game_state.console)
+        status.token = current_game_state.player
+        current_game_state.gui_elements['player_status'] = status
+
+        current_game_state.gui_elements['player_status'].activate()
         current_game_state.menus['main'].deactivate()
         current_game_state.menus['selection'].deactivate()
         current_game_state.menus['play'].activate()
@@ -212,6 +224,7 @@ def return_to_tile(current_game_state: GameState):
     current_game_state.menus['pause'].deactivate()
     current_game_state.renderer.deactivate()
     current_game_state.menus['main'].activate()
+    del(current_game_state.gui_elements['player_status'])
 
 
 def close_pause_menu(current_game_state: GameState):

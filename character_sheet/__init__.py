@@ -39,9 +39,17 @@ class CharacterSheet:
     def max_hp(self):
         return self._max_hp
 
+    @max_hp.setter
+    def max_hp(self, value):
+        self._max_hp = value
+
     @property
     def hp(self):
         return self._hp
+
+    @hp.setter
+    def hp(self, value):
+        self._hp = value
 
     @property
     def armor_class(self):

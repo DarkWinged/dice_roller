@@ -17,6 +17,7 @@ from map_token import CreatureToken
 from menus import ListedMenu, Menu, MovementMenu
 import menu_commands
 from room import Room
+from status_tab import StatusTab
 from tile import Tile
 from turn_tracker import TurnTracker
 
@@ -128,7 +129,10 @@ def render_loop(current_game_state: GameState, void: None = None):
         gui_elements: [GuiElement] = [m for m in current_game_state.gui_elements.values() if m.activated]
         renderer.render()
         for element_to_render in gui_elements:
-            element_to_render.render(current_game_state.menus, current_game_state.player, current_game_state.data_table)
+            if isinstance(element_to_render, StatusTab):
+                element_to_render.render()
+            else:
+                element_to_render.render(current_game_state.menus, current_game_state.player, current_game_state.data_table)
         for menu_to_render in menus:
             if 'selection' in menu_names and menu_to_render is current_game_state.menus['selection']:
                 renderer.curser = menu_to_render.curser
